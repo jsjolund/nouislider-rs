@@ -15,4 +15,7 @@ extern "C" {
 
     #[wasm_bindgen(method, js_name = get)]
     pub fn get_with_options(this: &NoUiSlider, formatting: bool) -> Vec<JsValue>;
+
+    #[wasm_bindgen(method)]
+    pub fn on(this: &NoUiSlider, event_name: &str, handler: &JsValue);
 }
