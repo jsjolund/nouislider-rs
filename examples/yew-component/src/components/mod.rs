@@ -1,1 +1,1 @@
-pub mod no_ui_slider;
+pub mod nouislider;
