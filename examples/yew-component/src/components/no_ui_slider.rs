@@ -2,60 +2,72 @@ use std::rc::Rc;
 
 use gloo_utils::document;
 use nouislider as no;
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::HtmlElement;
 use web_sys::Node;
 use yew::prelude::*;
 
-use crate::AppState;
-use crate::SliderUpdate;
+use crate::ParentRef;
 
-#[derive(Properties, Clone, Eq, PartialEq)]
-pub struct Props {
+#[derive(Properties, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Options {
     pub start: Vec<i64>,
-    pub connect: bool,
-    pub range: no::Range,
+    pub connect: Vec<bool>,
+    pub range: Range,
+    pub step: f64,
     pub tooltips: bool,
 }
 
-pub struct Slider {
-    _callbacks: Vec<no::Callback>,
-    slider: no::NoUiSlider,
-    container: HtmlElement,
-    state: Rc<AppState>,
-    _listener: ContextHandle<Rc<AppState>>,
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Event {
+    pub values: Vec<String>,
+    pub handle: usize,
+    pub unencoded: Vec<f64>,
+    pub tap: bool,
+    pub positions: Vec<f64>,
 }
 
-pub enum ChildMsg {
-    ContextChanged(Rc<AppState>),
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Range {
+    pub min: i64,
+    pub max: i64,
+}
+
+pub struct Slider {
+    _callbacks: Vec<Callback>,
+    slider: no::NoUiSlider,
+    container: HtmlElement,
+    state: Rc<ParentRef>,
+    _listener: ContextHandle<Rc<ParentRef>>,
+}
+
+pub type JsVec = Vec<JsValue>;
+pub type Callback = Closure<dyn Fn(JsVec, JsValue, JsVec, JsValue, JsVec, JsValue)>;
+
+pub enum Msg {
+    ContextChanged(Rc<ParentRef>),
 }
 
 impl Component for Slider {
-    type Message = ChildMsg;
-    type Properties = Props;
+    type Message = Msg;
+    type Properties = Options;
 
     fn create(ctx: &Context<Self>) -> Self {
         let container: Element = document().create_element("div").unwrap();
         let container: HtmlElement = container.dyn_into().unwrap();
         container.set_class_name("slider");
 
-        let opts = no::Options {
-            start: ctx.props().start.clone(),
-            connect: ctx.props().connect,
-            range: ctx.props().range,
-            tooltips: ctx.props().tooltips,
-        };
-
-        let slider = no::NoUiSlider::new_with_options(
+        let slider = no::NoUiSlider::new(
             &container,
-            &serde_wasm_bindgen::to_value(&opts).unwrap(),
+            &serde_wasm_bindgen::to_value(&ctx.props()).unwrap(),
         );
 
         let (state, _listener) = ctx
             .link()
-            .context::<Rc<AppState>>(ctx.link().callback(ChildMsg::ContextChanged))
+            .context::<Rc<ParentRef>>(ctx.link().callback(Msg::ContextChanged))
             .expect("context to be set");
 
         Self {
@@ -70,14 +82,14 @@ impl Component for Slider {
     fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
         if first_render {
             let state = self.state.clone();
-            let mousemove = no::Callback::wrap(Box::new(
+            let callback = Callback::wrap(Box::new(
                 move |values: Vec<JsValue>,
                       handle: JsValue,
                       unencoded: Vec<JsValue>,
                       tap: JsValue,
                       positions: Vec<JsValue>,
                       _no_ui_slider: JsValue| {
-                    let update = SliderUpdate {
+                    let update = Event {
                         values: values.into_iter().map(|v| v.as_string().unwrap()).collect(),
                         handle: handle.as_f64().unwrap() as usize,
                         unencoded: unencoded.into_iter().map(|v| v.as_f64().unwrap()).collect(),
@@ -89,14 +101,14 @@ impl Component for Slider {
                 },
             ));
             self.slider
-                .on("update", mousemove.as_ref().dyn_ref().unwrap());
-            self._callbacks.push(mousemove);
+                .on("update", callback.as_ref().dyn_ref().unwrap());
+            self._callbacks.push(callback);
         }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ChildMsg::ContextChanged(state) => {
+            Msg::ContextChanged(state) => {
                 self.state = state;
                 true
             }
@@ -105,11 +117,7 @@ impl Component for Slider {
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <>
-            <br/>
-            <br/>
-                {self.render_slider()}
-            </>
+            {self.render_slider()}
         }
     }
 }
