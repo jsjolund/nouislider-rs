@@ -4,7 +4,8 @@ name = "nouislider-rs-example-yew-component"
 version = "0.1.0"
 
 [dependencies]
-nouislider = {path = "../../"}
+# nouislider = {path = "../../"}
+nouislider = "0.1"
 
 chrono = {version = "0.4", features = ["wasmbind", "js-sys"]}
 getrandom = {version = "0.2", features = ["js"]}
