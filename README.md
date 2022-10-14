@@ -1,7 +1,6 @@
 # nouislider-rs
 
-A [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) wrapper for [noUiSlider](https://refreshless.com/nouislider/)
-
+[Wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) wrapper for [noUiSlider](https://refreshless.com/nouislider/)
 
 ## Usage
 
@@ -10,16 +9,13 @@ A [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) wrapper for [noUiSlid
 nouislider = "0.1"
 ```
 
-## Example
+# nouislider-yew
 
-See:
-
-- Usage in yew component: <https://github.com/jsjolund/nouislider-rs/tree/main/examples/yew-component>
+[Yew](https://yew.rs/) component for  [noUiSlider](https://refreshless.com/nouislider/)
 
 ## Demo
 
 [https://jsjolund.github.io/nouislider-rs/](https://jsjolund.github.io/nouislider-rs/)
-
 
 ## License
 

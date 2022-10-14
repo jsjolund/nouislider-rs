@@ -16,7 +16,7 @@ use super::dateslider::SliderUpdateRef;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Range(pub HashMap<String, Vec<f64>>);
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Pips {
     pub mode: String,
     pub density: Option<i64>,

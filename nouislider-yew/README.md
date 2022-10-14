@@ -5,8 +5,12 @@ An example that shows how to use library to use [noUiSlider](https://refreshless
 ## How to run the example
 
 ```sh
+# Install required target files
+rustup target add wasm32-unknown-unknown
+
 cargo install trunk
-# in current directory, so: src/examples/yew-component
+
+# In current directory, so: src/examples/yew-component
 trunk serve
 ```
 
