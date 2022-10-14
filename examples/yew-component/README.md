@@ -12,8 +12,22 @@ trunk serve
 
 Then open <http://localhost:8080>
 
-## To build
+## Github-pages deployment
+
+Go to *Github -> Settings -> Pages*.
+
+**Source**: Deploy from a branch
+
+**Select branch**: `docs`
+
+**Select folder**: `/docs`
+
+**Save** and run from local repository
 
 ```sh
-trunk build --release
+git checkout -b docs
+trunk build --release --public-url nouislider-rs/ -d docs examples/yew-component/index.html
+git add docs
+git commit -m"Updated github-pages"
+git push
 ```

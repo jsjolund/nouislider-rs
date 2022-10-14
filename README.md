@@ -2,6 +2,7 @@
 
 A [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) wrapper for [noUiSlider](https://refreshless.com/nouislider/)
 
+
 ## Usage
 
 ```toml
@@ -14,6 +15,11 @@ nouislider = "0.1"
 See:
 
 - Usage in yew component: <https://github.com/jsjolund/nouislider-rs/tree/main/examples/yew-component>
+
+## Demo
+
+[https://jsjolund.github.io/nouislider-rs/](https://jsjolund.github.io/nouislider-rs/)
+
 
 ## License
 
