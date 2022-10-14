@@ -1,4 +1,4 @@
-# nouislider-rs in yew.rs example
+# nouislider-yew
 
 An example that shows how to use library to use [noUiSlider](https://refreshless.com/nouislider/) within a [yew.rs](https://yew.rs) component.
 
@@ -30,8 +30,19 @@ Go to *Github -> Settings -> Pages*.
 
 ```sh
 git checkout -b docs
-trunk build --release --public-url nouislider-rs/ -d docs examples/yew-component/index.html
+mkdir docs
+trunk build --release --public-url nouislider-rs/ -d ../docs index.html
 git add docs
 git commit -m"Updated github-pages"
 git push
 ```
+
+## Demo
+
+[https://jsjolund.github.io/nouislider-rs/](https://jsjolund.github.io/nouislider-rs/)
+
+## License
+
+nouislider-rs is licensed MIT.
+
+It can be used for free and without any attribution, in any personal or commercial project.
