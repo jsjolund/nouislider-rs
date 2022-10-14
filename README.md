@@ -1,8 +1,6 @@
 # nouislider-rs
 
-A [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
-wrapper for
-[noUiSlider](https://refreshless.com/nouislider/)
+A [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen) wrapper for [noUiSlider](https://refreshless.com/nouislider/)
 
 ## Usage
 
