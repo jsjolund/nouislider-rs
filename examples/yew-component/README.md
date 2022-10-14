@@ -1,6 +1,6 @@
 # nouislider-rs in yew.rs example
 
-An example that shows how to use library to use noUiSlider within a [yew.rs](https://yew.rs) component.
+An example that shows how to use library to use [noUiSlider](https://refreshless.com/nouislider/) within a [yew.rs](https://yew.rs) component.
 
 ## How to run the example
 
