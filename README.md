@@ -1,23 +1,24 @@
-# leaflet-rs
+# nouislider-rs
 
 A [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
 wrapper for
-[Leaflet.js](https://leafletjs.com/)
+[noUiSlider](https://refreshless.com/nouislider/)
 
 ## Usage
 
 ```toml
 [dependencies]
-leaflet = "0.2"
+nouislider = "0.1"
 ```
 
 ## Example
 
 See:
 
-- Basic example: https://github.com/slowtec/leaflet-rs/tree/master/examples/basic
-- Usage in yew component: https://github.com/slowtec/leaflet-rs/tree/master/examples/yew-component
+- Usage in yew component: <https://github.com/jsjolund/nouislider-rs/tree/main/examples/yew-component>
 
 ## License
 
-Copyright (c) 2020 - 2021 [slowtec GmbH](https://slowtec.de)
+nouislider-rs is licensed MIT.
+
+It can be used for free and without any attribution, in any personal or commercial project.
