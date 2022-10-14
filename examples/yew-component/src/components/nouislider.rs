@@ -10,7 +10,7 @@ use web_sys::HtmlElement;
 use web_sys::Node;
 use yew::prelude::*;
 
-use crate::ParentRef;
+use super::dateslider::SliderUpdateRef;
 
 #[derive(Properties, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Options {
@@ -40,15 +40,15 @@ pub struct Slider {
     _callbacks: Vec<Callback>,
     slider: no::NoUiSlider,
     container: HtmlElement,
-    state: Rc<ParentRef>,
-    _listener: ContextHandle<Rc<ParentRef>>,
+    parent_state: Rc<SliderUpdateRef>,
+    _listener: ContextHandle<Rc<SliderUpdateRef>>,
 }
 
 pub type JsVec = Vec<JsValue>;
 pub type Callback = Closure<dyn Fn(JsVec, JsValue, JsVec, JsValue, JsVec, JsValue)>;
 
 pub enum Msg {
-    ContextChanged(Rc<ParentRef>),
+    ContextChanged(Rc<SliderUpdateRef>),
     TooltipUpdate,
 }
 
@@ -66,23 +66,23 @@ impl Component for Slider {
             &serde_wasm_bindgen::to_value(&ctx.props()).unwrap(),
         );
 
-        let (state, _listener) = ctx
+        let (parent_state, _listener) = ctx
             .link()
-            .context::<Rc<ParentRef>>(ctx.link().callback(Msg::ContextChanged))
+            .context::<Rc<SliderUpdateRef>>(ctx.link().callback(Msg::ContextChanged))
             .expect("context to be set");
 
         Self {
             slider,
             container,
             _callbacks: vec![],
-            state,
+            parent_state,
             _listener,
         }
     }
 
     fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
         if first_render {
-            let state = self.state.clone();
+            let parent_state = self.parent_state.clone();
             let link = ctx.link().clone();
 
             let callback = Callback::wrap(Box::new(
@@ -100,7 +100,7 @@ impl Component for Slider {
                         positions: positions.into_iter().map(|v| v.as_f64().unwrap()).collect(),
                     };
                     // Forward slider update values to parent
-                    let cb = state.update.reform(move |update| (update));
+                    let cb = parent_state.update.reform(move |update| (update));
                     cb.emit(update);
                     // Update tooltips if any
                     link.send_message(Msg::TooltipUpdate)
@@ -108,15 +108,15 @@ impl Component for Slider {
             ));
             self.slider
                 .on("update", callback.as_ref().dyn_ref().unwrap());
+            self.slider.on("end", callback.as_ref().dyn_ref().unwrap());
             self._callbacks.push(callback);
-            // ctx.link().send_message(Msg::TooltipUpdate);
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::ContextChanged(state) => {
-                self.state = state;
+            Msg::ContextChanged(parent_state) => {
+                self.parent_state = parent_state;
                 true
             }
             Msg::TooltipUpdate => {
