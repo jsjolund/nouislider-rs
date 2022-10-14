@@ -13,15 +13,21 @@ use yew::prelude::*;
 
 use super::dateslider::SliderUpdateRef;
 
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct HandleAttributes(pub Vec<HashMap<String, String>>);
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Range(pub HashMap<String, Vec<f64>>);
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Pips {
     pub mode: String,
-    pub density: Option<i64>,
+    pub density: Option<f64>,
+    pub values: Option<Vec<f64>>,
+    pub stepped: Option<bool>,
 }
 
+// https://refreshless.com/nouislider/slider-options/
 #[derive(Properties, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Options {
     pub start: Vec<i64>,
@@ -29,9 +35,30 @@ pub struct Options {
     pub connect: Option<Vec<bool>>,
     pub step: Option<f64>,
     pub snap: Option<bool>,
+    pub margin: Option<f64>,
+    pub limit: Option<f64>,
+    pub padding: Option<Vec<f64>>,
+    pub orientation: Option<String>,
+    pub direction: Option<String>,
+    pub animate: Option<bool>,
     pub pips: Option<Pips>,
     pub tooltips: Option<bool>,
     pub tooltip_text: Vec<String>,
+    pub behaviour: Option<String>,
+    #[serde(rename = "handleAttributes")]
+    pub handle_attributes: Option<HandleAttributes>,
+    #[serde(rename = "keyboardSupport")]
+    pub keyboard_support: Option<bool>,
+    #[serde(rename = "keyboardDefaultStep")]
+    pub keyboard_default_step: Option<f64>,
+    #[serde(rename = "keyboardPageMultiplier")]
+    pub keyboard_page_multiplier: Option<f64>,
+    #[serde(rename = "keyboardMultiplier")]
+    pub keyboard_multiplier: Option<f64>,
+    #[serde(rename = "cssPrefix")]
+    pub css_prefix: Option<String>,
+    #[serde(rename = "cssClasses")]
+    pub css_classes: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -70,8 +97,7 @@ impl Component for Slider {
 
         let serailizer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
 
-        let ser0 = ctx.props().serialize(&serailizer);
-        log::debug!("ser0 {:?}", ser0);
+        log::debug!("Options {:?}", ctx.props().serialize(&serailizer));
 
         let slider = no::NoUiSlider::new(&container, &ctx.props().serialize(&serailizer).unwrap());
 
@@ -129,6 +155,7 @@ impl Component for Slider {
                 true
             }
             Msg::TooltipUpdate => {
+                // TODO: This can be done with https://refreshless.com/nouislider/number-formatting/
                 let tooltips = no::get_tooltips_elements(&self.slider);
                 for (index, tooltip) in tooltips.iter().enumerate() {
                     let opt_text = ctx.props().tooltip_text.get(index);

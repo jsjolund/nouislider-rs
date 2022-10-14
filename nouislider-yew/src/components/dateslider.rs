@@ -9,6 +9,7 @@ use yew::Callback;
 use crate::ParentRef;
 
 use super::nouislider::Event as SliderEvent;
+use super::nouislider::HandleAttributes;
 use super::nouislider::Pips;
 use super::nouislider::Range;
 use super::nouislider::Slider;
@@ -35,8 +36,8 @@ pub struct DateSlider {
     state: Rc<SliderUpdateRef>,
     slider_event: SliderEvent,
     slider_tooltip: Vec<String>,
-    slider_0_start: i64,
-    slider_1_start: i64,
+    slider0_start: i64,
+    slider1_start: i64,
     tz: FixedOffset,
 }
 
@@ -60,20 +61,17 @@ impl Component for DateSlider {
 
         let min = ctx.props().min.timestamp();
         let max = ctx.props().max.timestamp();
-        let slider_0_start = min + (max - min) / 2;
-        let slider_1_start = max;
+        let slider0_start = min + (max - min) / 2;
+        let slider1_start = max;
         Self {
             state,
             parent_state,
             _listener,
             slider_event: SliderEvent::default(),
-            slider_0_start,
-            slider_1_start,
+            slider0_start,
+            slider1_start,
             tz: ctx.props().min.timezone(),
-            slider_tooltip: vec![
-                from_timestamp(slider_0_start),
-                from_timestamp(slider_1_start),
-            ],
+            slider_tooltip: vec![from_timestamp(slider0_start), from_timestamp(slider1_start)],
         }
     }
 
@@ -112,29 +110,45 @@ impl Component for DateSlider {
         let range = HashMap::from([
             ("min".to_string(), vec![min]),
             ("max".to_string(), vec![max]),
-            ("20%".to_string(), vec![min + (delta * 0.01)]),
-            ("30%".to_string(), vec![min + (delta * 0.15)]),
-            ("40%".to_string(), vec![min + (delta * 0.40)]),
-            ("50%".to_string(), vec![min + (delta * 0.60)]),
-            ("60%".to_string(), vec![min + (delta * 0.9)]),
-            ("70%".to_string(), vec![min + (delta * 0.9)]),
+            // ("20%".to_string(), vec![min + (delta * 0.01)]),
+            // ("30%".to_string(), vec![min + (delta * 0.15)]),
+            // ("40%".to_string(), vec![min + (delta * 0.40)]),
+            // ("50%".to_string(), vec![min + (delta * 0.60)]),
+            // ("60%".to_string(), vec![min + (delta * 0.9)]),
+            // ("70%".to_string(), vec![min + (delta * 0.9)]),
         ]);
+        let handle_attributes = vec![
+            HashMap::from([("aria-label".to_string(), "lower".to_string())]),
+            HashMap::from([("aria-label".to_string(), "upper".to_string())]),
+        ];
         let pips = Pips {
-            mode: "steps".to_string(),
-            density: Some(1),
+            mode: "positions".to_string(),
+            density: Some(2.0),
+            values: Some(vec![0.0, 25.0, 50.0, 75.0, 100.0]),
+            stepped: None,
         };
+
         html! {
             <>
             <ContextProvider<Rc<SliderUpdateRef>> context={self.state.clone()}>
                 <Slider
-                    start={vec![self.slider_0_start, self.slider_1_start]}
+                    start={vec![self.slider0_start, self.slider1_start]}
                     connect={vec![false, true, false]}
                     range={Range(range)}
-                    // step={(max as f64 - min as f64)/10.0}
-                    snap={true}
                     pips={pips}
+                    margin={delta/3.0}
+                    limit={delta/1.3}
+                    handle_attributes={HandleAttributes(handle_attributes)}
                     tooltips={true}
+                    padding={vec![delta/10.0, delta/15.0]}
                     tooltip_text={self.slider_tooltip.clone()}
+                    // step={(max as f64 - min as f64)/10.0}
+                    // snap={true}
+                    // behaviour={"drag-fixed"}
+                    // orientation={"vertical"}
+                    // direction={"rtl"}
+                    // keyboard_support={false}
+                    // keyboard_default_step={100.0}
                 />
             </ContextProvider<Rc<SliderUpdateRef>>>
             // <br/>{self._draw_slider_data()}

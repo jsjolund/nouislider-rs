@@ -4,13 +4,10 @@ name = "nouislider"
 version = "0.1.0"
 
 authors = ["jsjolund <jsjolund@gmail.com>"]
-license = "MIT/Apache-2.0"
 description = "A wasm-bindgen wrapper for noUiSlider"
 homepage = "https://github.com/jsjolund/nouislider-rs"
+license = "MIT/Apache-2.0"
 repository = "https://github.com/jsjolund/nouislider-rs"
-
-# [workspace]
-# members = ["examples/yew-component"]
 
 [dependencies]
 js-sys = "0.3"
