@@ -1,6 +1,7 @@
 use chrono::DateTime;
 use chrono::FixedOffset;
 use chrono::NaiveDateTime;
+use std::collections::HashMap;
 use std::rc::Rc;
 use yew::prelude::*;
 use yew::Callback;
@@ -8,6 +9,7 @@ use yew::Callback;
 use crate::ParentRef;
 
 use super::nouislider::Event as SliderEvent;
+use super::nouislider::Pips;
 use super::nouislider::Range;
 use super::nouislider::Slider;
 
@@ -104,16 +106,33 @@ impl Component for DateSlider {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let min = ctx.props().min.timestamp();
-        let max = ctx.props().max.timestamp();
+        let min = ctx.props().min.timestamp() as f64;
+        let max = ctx.props().max.timestamp() as f64;
+        let delta = max - min;
+        let range = HashMap::from([
+            ("min".to_string(), vec![min]),
+            ("max".to_string(), vec![max]),
+            ("20%".to_string(), vec![min + (delta * 0.01)]),
+            ("30%".to_string(), vec![min + (delta * 0.15)]),
+            ("40%".to_string(), vec![min + (delta * 0.40)]),
+            ("50%".to_string(), vec![min + (delta * 0.60)]),
+            ("60%".to_string(), vec![min + (delta * 0.9)]),
+            ("70%".to_string(), vec![min + (delta * 0.9)]),
+        ]);
+        let pips = Pips {
+            mode: "steps".to_string(),
+            density: Some(1),
+        };
         html! {
             <>
             <ContextProvider<Rc<SliderUpdateRef>> context={self.state.clone()}>
                 <Slider
                     start={vec![self.slider_0_start, self.slider_1_start]}
                     connect={vec![false, true, false]}
-                    range={Range { min, max }}
-                    step={(max as f64 - min as f64)/1000.0}
+                    range={Range(range)}
+                    // step={(max as f64 - min as f64)/10.0}
+                    snap={true}
+                    pips={pips}
                     tooltips={true}
                     tooltip_text={self.slider_tooltip.clone()}
                 />

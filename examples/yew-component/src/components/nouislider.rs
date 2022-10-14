@@ -3,6 +3,7 @@ use std::rc::Rc;
 use gloo_utils::document;
 use nouislider as no;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::Element;
@@ -12,15 +13,27 @@ use yew::prelude::*;
 
 use super::dateslider::SliderUpdateRef;
 
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Range(pub HashMap<String, Vec<f64>>);
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Pips {
+    pub mode: String,
+    pub density: Option<i64>,
+}
+
 #[derive(Properties, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Options {
     pub start: Vec<i64>,
-    pub connect: Vec<bool>,
     pub range: Range,
-    pub step: f64,
-    pub tooltips: bool,
+    pub connect: Option<Vec<bool>>,
+    pub step: Option<f64>,
+    pub snap: Option<bool>,
+    pub pips: Option<Pips>,
+    pub tooltips: Option<bool>,
     pub tooltip_text: Vec<String>,
 }
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Event {
     pub values: Vec<String>,
@@ -28,12 +41,6 @@ pub struct Event {
     pub unencoded: Vec<f64>,
     pub tap: bool,
     pub positions: Vec<f64>,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Range {
-    pub min: i64,
-    pub max: i64,
 }
 
 pub struct Slider {
@@ -61,10 +68,12 @@ impl Component for Slider {
         let container: HtmlElement = container.dyn_into().unwrap();
         container.set_class_name("slider");
 
-        let slider = no::NoUiSlider::new(
-            &container,
-            &serde_wasm_bindgen::to_value(&ctx.props()).unwrap(),
-        );
+        let serailizer = serde_wasm_bindgen::Serializer::new().serialize_maps_as_objects(true);
+
+        let ser0 = ctx.props().serialize(&serailizer);
+        log::debug!("ser0 {:?}", ser0);
+
+        let slider = no::NoUiSlider::new(&container, &ctx.props().serialize(&serailizer).unwrap());
 
         let (parent_state, _listener) = ctx
             .link()
