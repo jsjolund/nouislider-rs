@@ -29,9 +29,10 @@ Go to *Github -> Settings -> Pages*.
 **Save** and run from local repository
 
 ```sh
+# Starting from root folder
 git checkout -b docs
 mkdir docs
-trunk build --release --public-url nouislider-rs/ -d ../docs index.html
+trunk build --release --public-url nouislider-rs/ -d docs nouislider-yew/index.html
 git add docs
 git commit -m"Updated github-pages"
 git push
