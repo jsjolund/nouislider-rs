@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "nouislider"
-version = "0.1.1"
+version = "0.1.2"
 
 authors = ["jsjolund <jsjolund@gmail.com>"]
 description = "A wasm-bindgen wrapper for noUiSlider"
@@ -11,7 +11,7 @@ repository = "https://github.com/jsjolund/nouislider-rs"
 
 [dependencies]
 js-sys = "0.3"
-serde-wasm-bindgen = "0.4.5"
+serde-wasm-bindgen = "0.4"
 wasm-bindgen = "0.2"
 
 [dependencies.web-sys]
