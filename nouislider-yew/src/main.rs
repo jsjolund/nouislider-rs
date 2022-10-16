@@ -21,6 +21,7 @@ pub enum Msg {
 struct Model {
     state: Rc<ParentRef>,
     dates: Vec<DateTime<FixedOffset>>,
+    selected_dates: Vec<DateTime<FixedOffset>>,
 }
 
 fn gen_random_dates(
@@ -62,29 +63,51 @@ impl Component for Model {
         let update = ctx.link().callback(Msg::DateUpdate);
         let state = Rc::new(ParentRef { update });
 
-        Self { state, dates }
+        Self {
+            state,
+            dates,
+            selected_dates: vec![],
+        }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::DateUpdate(dates) => {
-                log::debug!("{:?}", dates);
+            Msg::DateUpdate(dates_range) => {
+                self.selected_dates = dates_range;
                 true
             }
         }
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
+        let output = match self.selected_dates.is_empty() {
+            false => {
+                let min = self.selected_dates.get(0).unwrap();
+                let max = self.selected_dates.get(1).unwrap();
+                let selected_count = self
+                    .dates
+                    .iter()
+                    .filter_map(|date| match min <= date && date <= max {
+                        true => Some(*date),
+                        false => None,
+                    })
+                    .count();
+                html! { <p>{""}{selected_count}{"/"}{self.dates.len()}{" dates in range"}</p> }
+            }
+            true => html! {},
+        };
+
         let min = self.dates.first().unwrap();
         let max = self.dates.last().unwrap();
         html! {
             <div class="app">
-            <div class="section">
+            <div class="section mx-6">
             <ContextProvider<Rc<ParentRef>> context={self.state.clone()}>
                 <DateSlider min={*min} max={*max} />
             </ContextProvider<Rc<ParentRef>>>
             </div>
-            <div class="section">
+            <div class="section mx-6">
+            {output}
             </div>
             </div>
         }

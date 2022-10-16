@@ -9,6 +9,7 @@ use yew::Callback;
 use crate::ParentRef;
 
 use super::nouislider::Event as SliderEvent;
+use super::nouislider::FormattedValues;
 use super::nouislider::HandleAttributes;
 use super::nouislider::Pips;
 use super::nouislider::Range;
@@ -35,9 +36,7 @@ pub struct DateSlider {
     _listener: ContextHandle<Rc<ParentRef>>,
     state: Rc<SliderUpdateRef>,
     slider_event: SliderEvent,
-    slider_tooltip: Vec<String>,
-    slider0_start: i64,
-    slider1_start: i64,
+    slider_values: FormattedValues,
     tz: FixedOffset,
 }
 
@@ -58,20 +57,13 @@ impl Component for DateSlider {
             .link()
             .context::<Rc<ParentRef>>(ctx.link().callback(Msg::ContextChanged))
             .expect("context to be set");
-
-        let min = ctx.props().min.timestamp();
-        let max = ctx.props().max.timestamp();
-        let slider0_start = min + (max - min) / 2;
-        let slider1_start = max;
         Self {
             state,
             parent_state,
             _listener,
-            slider_event: SliderEvent::default(),
-            slider0_start,
-            slider1_start,
             tz: ctx.props().min.timezone(),
-            slider_tooltip: vec![from_timestamp(slider0_start), from_timestamp(slider1_start)],
+            slider_event: SliderEvent::default(),
+            slider_values: FormattedValues::default(),
         }
     }
 
@@ -79,19 +71,29 @@ impl Component for DateSlider {
         match msg {
             Msg::SliderUpdate(event) => {
                 self.slider_event = event;
-                self.slider_tooltip.clear();
-                let mut dates: Vec<DateTime<FixedOffset>> = vec![];
+                self.slider_values.tooltips_text.clear();
+                self.slider_values.pips_text.clear();
 
+                let mut dates: Vec<DateTime<FixedOffset>> = vec![];
+                // Update the pips
+                for val in &self.slider_event.pips {
+                    let ts = *val as i64;
+                    let text = from_timestamp(ts);
+                    self.slider_values.pips_text.push(text);
+                }
+
+                // Update the tooltips
                 for val in &self.slider_event.unencoded {
                     let ts = *val as i64;
                     let text = from_timestamp(ts);
-                    self.slider_tooltip.push(text);
+                    self.slider_values.tooltips_text.push(text);
 
                     let naive = NaiveDateTime::from_timestamp(ts, 0)
                         .and_local_timezone(self.tz)
                         .unwrap();
                     dates.push(naive);
                 }
+                // Send values to parent component
                 let cb = self.parent_state.update.reform(move |update| (update));
                 cb.emit(dates);
                 true
@@ -123,27 +125,29 @@ impl Component for DateSlider {
         ];
         let pips = Pips {
             mode: "positions".to_string(),
-            density: Some(2.0),
+            density: Some(1.0),
             values: Some(vec![0.0, 25.0, 50.0, 75.0, 100.0]),
-            stepped: None,
+            // stepped: None,
+            ..Default::default()
         };
+        let slider_start = vec![min + delta / 3.0, min + delta / 1.2];
 
         html! {
             <>
             <ContextProvider<Rc<SliderUpdateRef>> context={self.state.clone()}>
                 <Slider
-                    start={vec![self.slider0_start, self.slider1_start]}
+                    start={slider_start}
                     connect={vec![false, true, false]}
                     range={Range(range)}
                     pips={pips}
-                    margin={delta/3.0}
-                    limit={delta/1.3}
+                    margin={delta/100.0}
                     handle_attributes={HandleAttributes(handle_attributes)}
                     tooltips={true}
-                    padding={vec![delta/10.0, delta/15.0]}
-                    tooltip_text={self.slider_tooltip.clone()}
-                    // step={(max as f64 - min as f64)/10.0}
+                    values={self.slider_values.clone()}
                     // snap={true}
+                    step={(max as f64 - min as f64)/100.0}
+                    // limit={delta/1.3}
+                    // padding={vec![delta/10.0, delta/15.0]}
                     // behaviour={"drag-fixed"}
                     // orientation={"vertical"}
                     // direction={"rtl"}
@@ -151,7 +155,7 @@ impl Component for DateSlider {
                     // keyboard_default_step={100.0}
                 />
             </ContextProvider<Rc<SliderUpdateRef>>>
-            // <br/>{self._draw_slider_data()}
+            // {self._draw_slider_data()}
             </>
         }
     }
@@ -162,6 +166,8 @@ impl DateSlider {
         let col0_width = format!("{:.0}%", 10f32);
         let col_width = format!("{:.0}%", 90f32 / self.slider_event.values.len() as f32);
         html! {
+            <div class="my-6">
+            <br />
             <table width="100%" class="table is-bordered is-narrow is-fullwidth">
             <tbody>
                 <tr>
@@ -194,6 +200,7 @@ impl DateSlider {
                 </tr>
             </tbody>
             </table>
+            </div>
         }
     }
 }
