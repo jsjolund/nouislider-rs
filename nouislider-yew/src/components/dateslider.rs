@@ -106,8 +106,8 @@ impl Component for DateSlider {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let min = ctx.props().min.timestamp() as f64;
-        let max = ctx.props().max.timestamp() as f64;
+        let min = (ctx.props().min.timestamp() - self.tz.utc_minus_local() as i64) as f64;
+        let max = (ctx.props().max.timestamp() - self.tz.utc_minus_local() as i64 + 1) as f64;
         let delta = max - min;
         let range = HashMap::from([
             ("min".to_string(), vec![min]),
